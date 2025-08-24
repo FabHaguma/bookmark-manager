@@ -6,11 +6,12 @@ services:
       context: .
       dockerfile: Dockerfile.backend
     container_name: bookmark_backend
+    # Use a named volume instead of a host mount
     volumes:
-      - ./server/data:/app/data # Persist the SQLite database
+      - bookmark_db_data:/app/data
     restart: unless-stopped
     networks:
-      - internal_net # Connect ONLY to the internal network
+      - internal_net
 
   frontend:
     build:
@@ -20,17 +21,16 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
-    # No 'ports' section needed anymore! Caddy handles it.
     networks:
-      - internal_net   # Connect to the internal network to talk to the backend
-      - caddy_network  # Connect to the external network for Caddy to find it
+      - internal_net
+      - caddy_network
 
-# Define the networks to be used by the services
+# Define the volumes and networks
+volumes:
+  bookmark_db_data: # Docker will manage this volume
+
 networks:
   internal_net:
-    # A private, internal network for app components
     driver: bridge
   caddy_network:
-    # This tells docker-compose that the network is created elsewhere
-    # and not to create a new one.
     external: true

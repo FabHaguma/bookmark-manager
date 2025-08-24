@@ -18,6 +18,13 @@ WORKDIR /app
 
 COPY --from=builder /app ./
 
+# The node user (uid 1000) needs to own the directory where the SQLite DB will be created.
+# This is crucial for host volume mounts, which are created as root by default.
+RUN mkdir -p /app/data && chown -R node:node /app/data
+
+# Switch to the non-root user (this is done by default in the base image, but being explicit is safe)
+USER node
+
 EXPOSE 5000
 
 CMD ["npm", "start"]
