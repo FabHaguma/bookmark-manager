@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: bookmark_backend
+    volumes:
+      - ./server/data:/app/data # Persist the SQLite database
+    restart: unless-stopped
+    networks:
+      - internal_net # Connect ONLY to the internal network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: bookmark_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    # No 'ports' section needed anymore! Caddy handles it.
+    networks:
+      - internal_net   # Connect to the internal network to talk to the backend
+      - caddy_network  # Connect to the external network for Caddy to find it
+
+# Define the networks to be used by the services
+networks:
+  internal_net:
+    # A private, internal network for app components
+    driver: bridge
+  caddy_network:
+    # This tells docker-compose that the network is created elsewhere
+    # and not to create a new one.
+    external: true
