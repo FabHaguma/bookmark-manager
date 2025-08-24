@@ -1,5 +1,6 @@
 # Stage 1: Build
-FROM node:18-alpine AS builder
+# Use a more recent LTS version of Node.js
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 COPY server/package*.json ./
@@ -7,22 +8,17 @@ RUN npm install
 
 COPY server/ .
 
-# This isn't strictly necessary for this app, but is good practice
-# for larger apps with build steps.
-# RUN npm run build 
-
 # Stage 2: Production
-FROM node:18-alpine
+# Use the same recent LTS version for the final image
+FROM node:20-alpine
 
 WORKDIR /app
 
 COPY --from=builder /app ./
 
-# The node user (uid 1000) needs to own the directory where the SQLite DB will be created.
-# This is crucial for host volume mounts, which are created as root by default.
+# Create data directory and set permissions
 RUN mkdir -p /app/data && chown -R node:node /app/data
 
-# Switch to the non-root user (this is done by default in the base image, but being explicit is safe)
 USER node
 
 EXPOSE 5000
