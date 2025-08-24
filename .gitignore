@@ -140,6 +140,6 @@ vite.config.ts.timestamp-*
 
 
 # database
-data/bookmarks.db
+bookmarks.db
 
 # nginx.conf
